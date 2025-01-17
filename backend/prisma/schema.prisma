@@ -1,0 +1,40 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Product {
+  id        String      @id @map("_id")
+  name      String
+  description String
+  price      Int
+  category String
+  image       String[]
+  subCategory String
+  sizes      String[] 
+  bestseller Boolean
+  date       DateTime  @default(now())
+}
+model User {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String   @unique
+  password String
+  cartData Json     @default("{}")
+}
+
+model Order {
+  id            String      @id @map("_id")
+  userId        String
+  items         Json     // Prisma supports JSON for arrays and objects
+  amount        Int
+  address       Json     // Storing address as JSON for flexibility
+  status        String   @default("Order Placed")
+  paymentMethod String
+  payment       Boolean  @default(false)
+  date          DateTime @default(now())
+}

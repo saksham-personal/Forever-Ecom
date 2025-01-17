@@ -1,0 +1,6 @@
+{
+    "watch": ["src", "prisma/schema.prisma"],
+    "ext": "ts,prisma",
+    "exec": "npm run dev"
+  }
+  

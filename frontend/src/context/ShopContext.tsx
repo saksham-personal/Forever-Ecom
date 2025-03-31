@@ -66,8 +66,7 @@ type ShopContextProviderProps = {
 const ShopContextProvider: React.FC<ShopContextProviderProps> = ({ children }) => {
     const currency = "Rs ";
     const delivery_fee = 10;
-    // In production, API calls will be made to the same domain
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || "";
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
     const [search, setSearch] = useState("");
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState<CartItems>({});

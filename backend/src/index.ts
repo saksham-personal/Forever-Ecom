@@ -18,11 +18,7 @@ async function startServer() {
     connectCloudinary();
 
     app.use(express.json());
-    // Configure CORS to accept requests from any domain in production
-    app.use(cors({
-      origin: process.env.NODE_ENV === 'production' ? '*' : true,
-      credentials: true
-    }));
+    app.use(cors());
 
     app.use("/api/user", userRouter);
     app.use("/api/product", productRouter);

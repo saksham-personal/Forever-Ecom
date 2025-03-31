@@ -6,38 +6,86 @@ import { ShopContext } from '../context/ShopContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
+declare global {
+    interface Window {
+        Razorpay: new (options: {
+            key: string;
+            amount: number;
+            currency: string;
+            name: string;
+            description: string;
+            order_id: string;
+            receipt: string;
+            handler: (response: {
+                razorpay_payment_id: string;
+                razorpay_order_id: string;
+                razorpay_signature: string;
+            }) => void;
+        }) => {
+            open: () => void;
+        };
+    }
+}
+
 const PlaceOrder = () => {
 
-    const [method, setMethod] = useState('cod');
-    const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
+    const [method, setMethod] = useState<'cod'|'stripe'|'razorpay'>('cod');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const shopContext = useContext(ShopContext);
+    
+    if (!shopContext) {
+        throw new Error('ShopContext must be used within a ShopContextProvider');
+    }
+
+    const { 
+        navigate, 
+        backendUrl, 
+        token, 
+        cartItems, 
+        setCartItems, 
+        getCartAmount, 
+        delivery_fee, 
+        products 
+    } = shopContext;
     const [formData, setFormData] = useState({
         firstName: '',
-        lastName: '',
+        lastName: '', 
         email: '',
         street: '',
         city: '',
         state: '',
-        zipcode: '',
+        zipcode: '',  
         country: '',
         phone: ''
     })
 
-    const onChangeHandler = (event) => {
+    const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         const name = event.target.name
         const value = event.target.value
         setFormData(data => ({ ...data, [name]: value }))
     }
 
-    const initPay = (order) => {
+    interface RazorpayOrder {
+        amount: number;
+        currency: string;
+        id: string;
+        receipt: string;
+    }
+
+    const initPay = (order: RazorpayOrder) => {
         const options = {
             key: import.meta.env.VITE_RAZORPAY_KEYid,
             amount: order.amount,
             currency: order.currency,
             name:'Order Payment',
             description:'Order Payment',
-            orderid: order.id,
+            order_id: order.id,
             receipt: order.receipt,
-            handler: async (response) => {
+            handler: async (response: {
+                razorpay_payment_id: string;
+                razorpay_order_id: string;
+                razorpay_signature: string;
+            }) => {
                 console.log(response)
                 try {
                     
@@ -55,60 +103,98 @@ const PlaceOrder = () => {
         rzp.open()
     }
 
-    const onSubmitHandler = async (event) => {
-        event.preventDefault()
+    const onSubmitHandler = async (event: React.FormEvent) => {
+        event.preventDefault();
+        
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+        
         try {
+            if (!token) {
+                toast.error('Please login to place an order');
+                return;
+            }
 
-            let orderItems = []
+            interface OrderItem {
+                id: string;
+                name: string;
+                price: number;
+                sizes: string[];
+                size: string;
+                quantity: number;
+            [key: string]: unknown; // Allow other product properties
+            }
+
+            const orderItems: OrderItem[] = [];
 
             for (const items in cartItems) {
                 for (const item in cartItems[items]) {
                     if (cartItems[items][item] > 0) {
-                        const itemInfo = structuredClone(products.find(product => product.id === items))
-                        if (itemInfo) {
-                            itemInfo.size = item
-                            itemInfo.quantity = cartItems[items][item]
-                            orderItems.push(itemInfo)
+                        const product = products.find(p => p.id === items);
+                        if (product) {
+                            const itemInfo = {
+                                ...structuredClone(product),
+                                size: item,
+                                quantity: cartItems[items][item]
+                            };
+                            orderItems.push(itemInfo);
                         }
                     }
                 }
             }
 
-            let orderData = {
+            const orderData = {
                 address: formData,
                 items: orderItems,
                 amount: getCartAmount() + delivery_fee
             }
             
 
+            let response;
+            
             switch (method) {
-
-                // API Calls for COD
                 case 'cod':
-                    const response = await axios.post(backendUrl + '/api/order/place',orderData,{headers:{token}})
+                    response = await axios.post(
+                        `${backendUrl}/api/order/place`,
+                        orderData,
+                        {headers: {token}}
+                    );
+                    
                     if (response.data.success) {
-                        setCartItems({})
-                        navigate('/orders')
+                        toast.success('Order placed successfully!');
+                        setCartItems({});
+                        navigate('/orders');
                     } else {
-                    console.log(response.data.message)
+                        toast.error(response.data.message || 'Failed to place order');
                     }
                     break;
 
                 case 'stripe':
-                    const responseStripe = await axios.post(backendUrl + '/api/order/stripe',orderData,{headers:{token}})
-                    if (responseStripe.data.success) {
-                        const {session_url} = responseStripe.data
-                        window.location.replace(session_url)
+                    response = await axios.post(
+                        `${backendUrl}/api/order/stripe`,
+                        orderData,
+                        {headers: {token}}
+                    );
+                    
+                    if (response.data.success) {
+                        const {session_url} = response.data;
+                        window.location.replace(session_url);
                     } else {
-                        console.log(responseStripe.data.message)
+                        toast.error(response.data.message || 'Stripe payment failed');
                     }
                     break;
 
                 case 'razorpay':
-
-                    const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers:{token}})
-                    if (responseRazorpay.data.success) {
-                        initPay(responseRazorpay.data.order)
+                    response = await axios.post(
+                        `${backendUrl}/api/order/razorpay`, 
+                        orderData, 
+                        {headers: {token}}
+                    );
+                    
+                    if (response.data.success) {
+                        initPay(response.data.order);
+                    } else {
+                        toast.error(response.data.message || 'Razorpay payment failed');
                     }
 
                     break;
@@ -118,9 +204,20 @@ const PlaceOrder = () => {
             }
 
 
-        } catch (error) {
-            console.log(error)
-            console.log(error.message)
+        } catch (error: unknown) {
+            console.error(error);
+            
+            let errorMessage = 'An error occurred';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            if (axios.isAxiosError(error)) {
+                errorMessage = error.response?.data?.message || error.message;
+            }
+            
+            toast.error(errorMessage);
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -176,7 +273,13 @@ const PlaceOrder = () => {
                     </div>
 
                     <div className='w-full text-end mt-8'>
-                        <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
+                        <button 
+                            type='submit' 
+                            className='bg-black text-white px-16 py-3 text-sm disabled:opacity-50'
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'Processing...' : 'PLACE ORDER'}
+                        </button>
                     </div>
                 </div>
             </div>

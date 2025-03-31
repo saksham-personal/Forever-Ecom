@@ -49,7 +49,7 @@ const Footer: React.FC = () => {
 
       <div>
         <hr />
-        <p className='py-5 text-sm text-center'>Copyright 2024@ xyz.com - All Rights Reserved</p>
+        <p className='py-5 text-sm text-center'>Saksham Kaushal</p>
       </div>
     </>
   );

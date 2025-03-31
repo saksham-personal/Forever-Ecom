@@ -12,9 +12,6 @@ import { ToastContainer } from 'react-toastify';
 export const backendUrl: string = "http://localhost:4000";
 export const currency: string = 'Rs   ';
 
-interface LoginProps {
-  setToken: React.Dispatch<React.SetStateAction<string>>;
-}
 
 const App: React.FC = () => {
   const [token, setToken] = useState<string>(

@@ -17,7 +17,7 @@ const prisma = new PrismaClient();
 const createToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET);
 };
-// Route for user login
+// Route 
 export const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
@@ -42,7 +42,6 @@ export const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.json({ success: false, message: error.message });
     }
 });
-// Route for user register
 export const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, email, password } = req.body;
@@ -81,7 +80,6 @@ export const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, func
         res.json({ success: false, message: error.message });
     }
 });
-// Route for admin login
 export const adminLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;

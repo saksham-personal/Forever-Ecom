@@ -7,12 +7,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import mongoose from "mongoose";
+import { prisma } from './db';
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    mongoose.connection.on('connected', () => {
-        console.log("DB Connected");
-    });
-    yield mongoose.connect(`${process.env.MONGODB_URI}/e-commerce`);
+    try {
+        yield prisma.$connect();
+        console.log("MongoDB Connected via Prisma");
+    }
+    catch (error) {
+        console.error("Error connecting to MongoDB via Prisma:", error);
+        process.exit(1);
+    }
 });
 export default connectDB;
 //# sourceMappingURL=mongodb.js.map

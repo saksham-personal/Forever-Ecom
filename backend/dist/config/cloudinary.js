@@ -10,9 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { v2 as cloudinary } from "cloudinary";
 const connectCloudinary = () => __awaiter(void 0, void 0, void 0, function* () {
     cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_NAME,
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
         api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_SECRET_KEY
+        api_secret: process.env.CLOUDINARY_API_SECRET
     });
 });
 export default connectCloudinary;

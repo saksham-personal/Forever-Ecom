@@ -7,32 +7,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-// src/config/db.ts
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import dotenv from 'dotenv';
 dotenv.config();
-const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        yield mongoose.connect(process.env.MONGO_URI);
-        console.log('MongoDB connected');
-    }
-    catch (error) {
-        console.error('MongoDB connection error:', error);
-        process.exit(1);
-    }
-});
+const prisma = new PrismaClient();
 function connectDb() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield prisma.$connect(); // Connect to the database
+            yield prisma.$connect();
             console.log("Database connected successfully");
         }
         catch (error) {
             console.error("Error connecting to the database:", error);
+            throw error;
         }
     });
 }
-export { prisma, connectDB, connectDb };
+export { prisma, connectDb };
 //# sourceMappingURL=db.js.map

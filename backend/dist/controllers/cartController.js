@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
-// Add products to user cart
 export const addToCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { userId, itemId, size } = req.body;
@@ -44,7 +43,6 @@ export const addToCart = (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.json({ success: false, message: error.message });
     }
 });
-// Update user cart
 export const updateCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { userId, itemId, size, quantity } = req.body;
@@ -75,7 +73,6 @@ export const updateCart = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.json({ success: false, message: error.message });
     }
 });
-// Get user cart data
 export const getUserCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { userId } = req.body;

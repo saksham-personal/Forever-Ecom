@@ -12,16 +12,30 @@ import Razorpay from "razorpay";
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
-// Global variables
 const currency = "inr";
 const deliveryCharge = 10;
-// Gateway initialization
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2022-11-15" });
-const razorpayInstance = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
-// Place order using COD method
+let stripe;
+let razorpayInstance;
+try {
+    if (process.env.STRIPE_SECRET_KEY) {
+        stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2022-11-15" });
+    }
+}
+catch (error) {
+    console.error("Failed to initialize Stripe:", error);
+}
+try {
+    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+        razorpayInstance = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET,
+        });
+    }
+}
+catch (error) {
+    console.error("Failed to initialize Razorpay:", error);
+}
+//cod
 export const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { userId, items, amount, address } = req.body;
@@ -48,9 +62,12 @@ export const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.json({ success: false, message: error.message });
     }
 });
-// Place order using Stripe
 export const placeOrderStripe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        if (!stripe) {
+            res.json({ success: false, message: "Stripe payment is not available" });
+            return;
+        }
         const { userId, items, amount, address } = req.body;
         const { origin } = req.headers;
         const order = yield prisma.order.create({
@@ -94,7 +111,6 @@ export const placeOrderStripe = (req, res) => __awaiter(void 0, void 0, void 0, 
         res.json({ success: false, message: error.message });
     }
 });
-// Verify Stripe payment
 export const verifyStripe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { orderId, success, userId } = req.body;
     try {
@@ -121,9 +137,12 @@ export const verifyStripe = (req, res) => __awaiter(void 0, void 0, void 0, func
         res.json({ success: false, message: error.message });
     }
 });
-// Place order using Razorpay
 export const placeOrderRazorpay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        if (!razorpayInstance) {
+            res.json({ success: false, message: "Razorpay payment is not available" });
+            return;
+        }
         const { userId, items, amount, address } = req.body;
         const order = yield prisma.order.create({
             data: {
@@ -150,9 +169,12 @@ export const placeOrderRazorpay = (req, res) => __awaiter(void 0, void 0, void 0
         res.json({ success: false, message: error.message });
     }
 });
-// Verify Razorpay payment
 export const verifyRazorpay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        if (!razorpayInstance) {
+            res.json({ success: false, message: "Razorpay payment is not available" });
+            return;
+        }
         const { userId, razorpay_order_id } = req.body;
         const razorpayOrder = yield razorpayInstance.orders.fetch(razorpay_order_id);
         if (razorpayOrder.status === "paid") {
@@ -175,7 +197,6 @@ export const verifyRazorpay = (req, res) => __awaiter(void 0, void 0, void 0, fu
         res.json({ success: false, message: error.message });
     }
 });
-// Fetch all orders for admin
 export const allOrders = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const orders = yield prisma.order.findMany();
@@ -186,7 +207,6 @@ export const allOrders = (_req, res) => __awaiter(void 0, void 0, void 0, functi
         res.json({ success: false, message: error.message });
     }
 });
-// Fetch user orders for frontend
 export const userOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { userId } = req.body;
@@ -200,7 +220,6 @@ export const userOrders = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.json({ success: false, message: error.message });
     }
 });
-// Update order status from admin panel
 export const updateStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { orderId, status } = req.body;

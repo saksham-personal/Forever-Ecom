@@ -11,7 +11,6 @@ import { v2 as cloudinary } from "cloudinary";
 import { v4 as uuidv4 } from "uuid";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-// Function to add a product
 export const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, description, price, category, subCategory, sizes, bestseller } = req.body;
@@ -19,8 +18,9 @@ export const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, functi
             .map((key) => { var _a, _b; return (_b = (_a = req.files) === null || _a === void 0 ? void 0 : _a[key]) === null || _b === void 0 ? void 0 : _b[0]; })
             .filter(Boolean);
         const imagesUrl = yield Promise.all(images.map((item) => __awaiter(void 0, void 0, void 0, function* () {
-            const result = yield cloudinary.uploader.upload(item.path, { resource_type: "image" });
+            let result = yield cloudinary.uploader.upload(item.path, { resource_type: "image" });
             return result.secure_url;
+            // return 'a';
         })));
         const productData = {
             id: uuidv4(),
@@ -31,7 +31,7 @@ export const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, functi
             subCategory,
             bestseller: bestseller === "true",
             sizes: JSON.parse(sizes),
-            images: imagesUrl,
+            image: imagesUrl,
         };
         const product = yield prisma.product.create({ data: productData });
         res.json({ success: true, message: "Product Added", product });
@@ -41,7 +41,7 @@ export const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.json({ success: false, message: error.message });
     }
 });
-// Function to list all products
+// list all products
 export const listProducts = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const products = yield prisma.product.findMany();
@@ -52,7 +52,6 @@ export const listProducts = (_req, res) => __awaiter(void 0, void 0, void 0, fun
         res.json({ success: false, message: error.message });
     }
 });
-// Function to remove a product
 export const removeProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.body;
@@ -66,7 +65,6 @@ export const removeProduct = (req, res) => __awaiter(void 0, void 0, void 0, fun
         res.json({ success: false, message: error.message });
     }
 });
-// Function to get single product info
 export const singleProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { productId } = req.body;

@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react'; // Removed React import
 import { assets } from '../assets/assets';
 
 const Policies: FC = () => {

@@ -37,7 +37,7 @@ type CartItems = {
 };
 
 
-type ShopContextType = {
+export type ShopContextType = { // Added export keyword
     products: Product[];
     currency: string;
     delivery_fee: number;

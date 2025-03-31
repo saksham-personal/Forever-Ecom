@@ -1,12 +1,17 @@
-import React, { useContext, useEffect, useState, ChangeEvent } from 'react';
-import { ShopContext } from '../context/ShopContext';
+import { useContext, useEffect, useState, ChangeEvent } from 'react'; // Removed React import
+import { ShopContext } from '../context/ShopContext'; // Import ShopContextType
 import { assets } from '../assets/assets';
 import Title from '../components/Title';
 import ProductItem from '../components/ProductItem';
 import { Product } from '../assets/assets';
 
 const Collection: React.FC = () => {
-  const { products, search, showSearch } = useContext(ShopContext);
+  // Get context and handle potential undefined value
+  const context = useContext(ShopContext);
+  const products = context?.products ?? [];
+  const search = context?.search ?? "";
+  const showSearch = context?.showSearch ?? false;
+
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState<Product[]>([]);
   const [category, setCategory] = useState<string[]>([]);
@@ -32,6 +37,7 @@ const Collection: React.FC = () => {
   };
 
   const applyFilter = () => {
+    // Use the context-provided products or the default empty array
     let productsCopy = [...products];
 
     if (showSearch && search) {
@@ -64,6 +70,7 @@ const Collection: React.FC = () => {
         break;
 
       default:
+        // Re-apply filters to get the original order for 'relevant'
         applyFilter();
         break;
     }
@@ -71,11 +78,19 @@ const Collection: React.FC = () => {
 
   useEffect(() => {
     applyFilter();
-  }, [category, subCategory, search, showSearch, products]);
+  }, [category, subCategory, search, showSearch, products]); // products dependency is important here
 
   useEffect(() => {
-    sortProduct();
-  }, [sortType]);
+    // Only sort if filterProducts has items to avoid unnecessary operations
+    if (filterProducts.length > 0) {
+        sortProduct();
+    }
+  }, [sortType, filterProducts]); // Add filterProducts dependency
+
+  // Handle loading state if context is not yet available
+  if (!context) {
+    return <div>Loading collections...</div>;
+  }
 
   return (
     <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t">
@@ -104,6 +119,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Men"
                 onChange={toggleCategory}
+                checked={category.includes("Men")} // Control checkbox state
               />{' '}
               Men
             </p>
@@ -113,6 +129,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Women"
                 onChange={toggleCategory}
+                checked={category.includes("Women")} // Control checkbox state
               />{' '}
               Women
             </p>
@@ -122,6 +139,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Kids"
                 onChange={toggleCategory}
+                checked={category.includes("Kids")} // Control checkbox state
               />{' '}
               Kids
             </p>
@@ -139,6 +157,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Topwear"
                 onChange={toggleSubCategory}
+                checked={subCategory.includes("Topwear")} // Control checkbox state
               />{' '}
               Topwear
             </p>
@@ -148,6 +167,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Bottomwear"
                 onChange={toggleSubCategory}
+                checked={subCategory.includes("Bottomwear")} // Control checkbox state
               />{' '}
               Bottomwear
             </p>
@@ -157,6 +177,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Winterwear"
                 onChange={toggleSubCategory}
+                checked={subCategory.includes("Winterwear")} // Control checkbox state
               />{' '}
               Winterwear
             </p>
@@ -171,6 +192,7 @@ const Collection: React.FC = () => {
           {/* Product Sort */}
           <select
             onChange={(e) => setSortType(e.target.value as 'relavent' | 'low-high' | 'high-low')}
+            value={sortType} // Control select state
             className="border-2 border-gray-300 text-sm px-2"
           >
             <option value="relavent">Sort by: Relevant</option>
@@ -181,9 +203,9 @@ const Collection: React.FC = () => {
 
         {/* Map Products */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6">
-          {filterProducts.map((item, idx) => (
+          {filterProducts.map((item) => ( // Removed index as key if item.id is unique
             <ProductItem
-              key={idx}
+              key={item.id} // Use item.id as key
               name={item.name}
               id={item.id}
               price={item.price}
@@ -191,6 +213,10 @@ const Collection: React.FC = () => {
             />
           ))}
         </div>
+        {/* Optional: Display message if no products match filters */}
+        {filterProducts.length === 0 && (
+            <p className="text-center mt-10 text-gray-500">No products match the selected filters.</p>
+        )}
       </div>
     </div>
   );

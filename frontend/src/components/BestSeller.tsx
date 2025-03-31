@@ -1,17 +1,27 @@
-import React, { useContext, useState, useEffect, FC } from 'react';
+import { useContext, useState, useEffect, FC } from 'react'; // Removed React import
 import { ShopContext } from '../context/ShopContext';
 import { Product } from '../assets/assets';
 import Title from './Title';
 import ProductItem from './ProductItem';
 
 const BestSeller: FC = () => {
-    const { products } = useContext(ShopContext)!; 
+    // Safely access context and provide default value
+    const context = useContext(ShopContext);
+    const products = context?.products ?? [];
+
     const [bestSeller, setBestSeller] = useState<Product[]>([]);
 
     useEffect(() => {
+        // Ensure products array exists and has the 'bestseller' property defined in the Product type
+        // Assuming 'bestseller' is a boolean property in the Product interface
         const bestProduct = products.filter((product) => product.bestseller);
         setBestSeller(bestProduct.slice(0, 6)); // Limit to 6 bestsellers
     }, [products]);
+
+    // Optional: Handle loading state if context or products are not ready
+    if (!context) {
+        return <div>Loading best sellers...</div>; // Or null, or a loading spinner
+    }
 
     return (
         <div className='my-10'>
@@ -34,6 +44,10 @@ const BestSeller: FC = () => {
                     </div>
                 ))}
             </div>
+            {/* Optional: Message if no bestsellers found */}
+            {bestSeller.length === 0 && products.length > 0 && (
+                 <p className="text-center mt-6 text-gray-500">No best sellers found.</p>
+            )}
         </div>
     );
 };

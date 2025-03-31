@@ -5,7 +5,6 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Add products to user cart
 export const addToCart = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId, itemId, size } = req.body;
@@ -44,7 +43,6 @@ export const addToCart = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-// Update user cart
 export const updateCart = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId, itemId, size, quantity } = req.body;
@@ -80,7 +78,6 @@ export const updateCart = async (req: Request, res: Response): Promise<void> => 
     }
 };
 
-// Get user cart data
 export const getUserCart = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId } = req.body;

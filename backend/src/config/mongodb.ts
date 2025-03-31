@@ -1,13 +1,13 @@
-import mongoose from "mongoose";
+import { prisma } from './db';
 
 const connectDB = async () => {
-
-    mongoose.connection.on('connected',() => {
-        console.log("DB Connected");
-    })
-
-    await mongoose.connect(`${process.env.MONGODB_URI}/e-commerce`)
-
+  try {
+    await prisma.$connect();
+    console.log("MongoDB Connected via Prisma");
+  } catch (error) {
+    console.error("Error connecting to MongoDB via Prisma:", error);
+    process.exit(1);
+  }
 }
 
 export default connectDB;

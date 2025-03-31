@@ -8,19 +8,32 @@ import { PrismaClient } from '@prisma/client';
 
 
 const prisma = new PrismaClient();
-// Global variables
 const currency = "inr";
 const deliveryCharge = 10;
 
-// Gateway initialization
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, { apiVersion: "2022-11-15" as any });
+let stripe;
+let razorpayInstance;
 
-const razorpayInstance = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID as string,
-    key_secret: process.env.RAZORPAY_KEY_SECRET as string,
-});
+try {
+    if (process.env.STRIPE_SECRET_KEY) {
+        stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, { apiVersion: "2022-11-15" as any });
+    }
+} catch (error) {
+    console.error("Failed to initialize Stripe:", error);
+}
 
-// Place order using COD method
+try {
+    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+        razorpayInstance = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID as string,
+            key_secret: process.env.RAZORPAY_KEY_SECRET as string,
+        });
+    }
+} catch (error) {
+    console.error("Failed to initialize Razorpay:", error);
+}
+
+//cod
 export const placeOrder = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId, items, amount, address } = req.body;
@@ -50,9 +63,14 @@ export const placeOrder = async (req: Request, res: Response): Promise<void> => 
     }
 };
 
-// Place order using Stripe
+
 export const placeOrderStripe = async (req: Request, res: Response): Promise<void> => {
     try {
+        if (!stripe) {
+            res.json({ success: false, message: "Stripe payment is not available" });
+            return;
+        }
+
         const { userId, items, amount, address } = req.body;
         const { origin } = req.headers;
 
@@ -101,7 +119,6 @@ export const placeOrderStripe = async (req: Request, res: Response): Promise<voi
     }
 };
 
-// Verify Stripe payment
 export const verifyStripe = async (req: Request, res: Response): Promise<void> => {
     const { orderId, success, userId } = req.body;
 
@@ -128,9 +145,13 @@ export const verifyStripe = async (req: Request, res: Response): Promise<void> =
     }
 };
 
-// Place order using Razorpay
 export const placeOrderRazorpay = async (req: Request, res: Response): Promise<void> => {
     try {
+        if (!razorpayInstance) {
+            res.json({ success: false, message: "Razorpay payment is not available" });
+            return;
+        }
+
         const { userId, items, amount, address } = req.body;
 
         const order = await prisma.order.create({
@@ -160,9 +181,13 @@ export const placeOrderRazorpay = async (req: Request, res: Response): Promise<v
     }
 };
 
-// Verify Razorpay payment
 export const verifyRazorpay = async (req: Request, res: Response): Promise<void> => {
     try {
+        if (!razorpayInstance) {
+            res.json({ success: false, message: "Razorpay payment is not available" });
+            return;
+        }
+
         const { userId, razorpay_order_id } = req.body;
 
         const razorpayOrder = await razorpayInstance.orders.fetch(razorpay_order_id);
@@ -185,7 +210,6 @@ export const verifyRazorpay = async (req: Request, res: Response): Promise<void>
     }
 };
 
-// Fetch all orders for admin
 export const allOrders = async (_req: Request, res: Response): Promise<void> => {
     try {
         const orders = await prisma.order.findMany();
@@ -196,7 +220,6 @@ export const allOrders = async (_req: Request, res: Response): Promise<void> => 
     }
 };
 
-// Fetch user orders for frontend
 export const userOrders = async (req: Request, res: Response): Promise<void> => {
     try {
         const { userId } = req.body;
@@ -212,7 +235,6 @@ export const userOrders = async (req: Request, res: Response): Promise<void> => 
     }
 };
 
-// Update order status from admin panel
 export const updateStatus = async (req: Request, res: Response): Promise<void> => {
     try {
         const { orderId, status } = req.body;

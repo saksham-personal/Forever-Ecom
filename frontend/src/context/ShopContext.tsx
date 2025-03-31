@@ -4,6 +4,32 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Product } from "../assets/assets";
 
+interface ErrorWithMessage {
+    message: string;
+}
+
+function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
+    return (
+        typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof (error as Record<string, unknown>).message === 'string'
+    );
+}
+
+function toErrorWithMessage(error: unknown): ErrorWithMessage {
+    if (isErrorWithMessage(error)) return error;
+    try {
+        return new Error(JSON.stringify(error));
+    } catch {
+        return new Error(String(error));
+    }
+}
+
+function getErrorMessage(error: unknown): string {
+    return toErrorWithMessage(error).message;
+}
+
 type CartItems = {
     [itemId: string]: {
         [size: string]: number;
@@ -40,8 +66,8 @@ type ShopContextProviderProps = {
 const ShopContextProvider: React.FC<ShopContextProviderProps> = ({ children }) => {
     const currency = "Rs ";
     const delivery_fee = 10;
-    // const backendUrl = import.meta.env.VITE_BACKEND_URL as string;
-    const backendUrl = "http://localhost:4132";
+    // In production, API calls will be made to the same domain
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "";
     const [search, setSearch] = useState("");
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState<CartItems>({});
@@ -76,9 +102,9 @@ const ShopContextProvider: React.FC<ShopContextProviderProps> = ({ children }) =
                     { itemId, size },
                     { headers: { token } }
                 );
-            } catch (error: any) {
+            } catch (error) {
                 console.error(error);
-                toast.error(error.message);
+                toast.error(getErrorMessage(error));
             }
         }
     };
@@ -105,9 +131,9 @@ const ShopContextProvider: React.FC<ShopContextProviderProps> = ({ children }) =
                     { itemId, size, quantity },
                     { headers: { token } }
                 );
-            } catch (error: any) {
+            } catch (error) {
                 console.error(error);
-                toast.error(error.message);
+                toast.error(getErrorMessage(error));
             }
         }
     };
@@ -133,9 +159,9 @@ const ShopContextProvider: React.FC<ShopContextProviderProps> = ({ children }) =
             } else {
                 toast.error(response.data.message);
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            toast.error(error.message);
+            toast.error(getErrorMessage(error));
         }
     };
 
@@ -149,9 +175,9 @@ const ShopContextProvider: React.FC<ShopContextProviderProps> = ({ children }) =
             if (response.data.success) {
                 setCartItems(response.data.cartData);
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            toast.error(error.message);
+            toast.error(getErrorMessage(error));
         }
     };
 

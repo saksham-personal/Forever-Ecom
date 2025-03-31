@@ -5,7 +5,6 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Function to add a product
 export const addProduct = async (req: Request, res: Response): Promise<void> => {
     try {
         const { name, description, price, category, subCategory, sizes, bestseller } = req.body;
@@ -43,7 +42,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
     }
 };
 
-// Function to list all products
+// list all products
 export const listProducts = async (_req: Request, res: Response): Promise<void> => {
     try {
         const products = await prisma.product.findMany();
@@ -54,7 +53,6 @@ export const listProducts = async (_req: Request, res: Response): Promise<void> 
     }
 };
 
-// Function to remove a product
 export const removeProduct = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.body;
@@ -69,7 +67,6 @@ export const removeProduct = async (req: Request, res: Response): Promise<void> 
     }
 };
 
-// Function to get single product info
 export const singleProduct = async (req: Request, res: Response): Promise<void> => {
     try {
         const { productId } = req.body;

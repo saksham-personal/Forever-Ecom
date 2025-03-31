@@ -48,7 +48,6 @@ const PlaceOrder = () => {
                     }
                 } catch (error) {
                     console.log(error)
-                    toast.error(error)
                 }
             }
         }
@@ -91,7 +90,7 @@ const PlaceOrder = () => {
                         setCartItems({})
                         navigate('/orders')
                     } else {
-                        toast.error(response.data.message)
+                    console.log(response.data.message)
                     }
                     break;
 
@@ -101,7 +100,7 @@ const PlaceOrder = () => {
                         const {session_url} = responseStripe.data
                         window.location.replace(session_url)
                     } else {
-                        toast.error(responseStripe.data.message)
+                        console.log(responseStripe.data.message)
                     }
                     break;
 
@@ -121,7 +120,7 @@ const PlaceOrder = () => {
 
         } catch (error) {
             console.log(error)
-            toast.error(error.message)
+            console.log(error.message)
         }
     }
 

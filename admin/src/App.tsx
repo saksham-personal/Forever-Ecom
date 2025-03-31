@@ -9,7 +9,8 @@ import Login from './components/Login';
 import { ToastContainer } from 'react-toastify';
 // import 'react-toastify/dist/ReactToastify.css';
 
-export const backendUrl: string = "http://localhost:4132";
+// In production, API calls will be made to the same domain
+export const backendUrl: string = "";
 export const currency: string = 'Rs   ';
 
 interface LoginProps {

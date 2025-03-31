@@ -7,7 +7,13 @@ import { ShopContext } from '../context/ShopContext';
 const Navbar: React.FC = () => {
 
     const [vis, setVis] = useState<boolean>(false);
-    const {showSearch, setShowSearch, getCartCount,  navigate, token, setToken, setCartItems} = useContext(ShopContext);
+    const context = useContext(ShopContext);
+    
+    if (!context) {
+        throw new Error("Navbar must be used within a ShopContextProvider");
+    }
+    
+    const {showSearch, setShowSearch, getCartCount, navigate, token, setToken, setCartItems} = context;
     const handleMenuClick = () => {
         setVis(true);
       };

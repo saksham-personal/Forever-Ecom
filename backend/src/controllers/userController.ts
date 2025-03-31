@@ -14,7 +14,7 @@ const createToken = (id: string): string => {
     return jwt.sign({ id }, process.env.JWT_SECRET as string);
 };
 
-// Route for user login
+// Route 
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password } = req.body;
@@ -42,7 +42,6 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-// Route for user register
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
     try {
         const { name, email, password } = req.body;
@@ -87,7 +86,6 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     }
 };
 
-// Route for admin login
 export const adminLogin = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password } = req.body;

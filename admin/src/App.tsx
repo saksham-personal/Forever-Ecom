@@ -9,7 +9,8 @@ import Login from './components/Login';
 import { ToastContainer } from 'react-toastify';
 // import 'react-toastify/dist/ReactToastify.css';
 
-export const backendUrl: string = "http://localhost:4000";
+// Use relative path for API calls, letting Nginx handle the proxy
+export const backendUrl: string = "/api";
 export const currency: string = 'Rs   ';
 
 

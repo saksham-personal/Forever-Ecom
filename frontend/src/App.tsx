@@ -34,7 +34,6 @@ const App: React.FC = () => {
         <Route path='/place-order' element={<PlaceOrder />} />
         <Route path='/orders' element={<Orders />} />
         <Route path='/verify' element={<Verify />} />
-        <Route path='/admin/*' element={<AdminRedirect />} />
       </Routes>
       <Footer />
     </div>

@@ -11,7 +11,7 @@ const Collection: React.FC = () => {
   const context = useContext(ShopContext) as ShopContextType;
 
   // Get products directly from context
-  const { products = [], search = "", showSearch = false } = context;
+  const { products = []} = context;
   // Removed isLoading and localProducts state
 
   const [showFilter, setShowFilter] = useState(false);

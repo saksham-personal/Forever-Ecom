@@ -90,7 +90,7 @@ const Product = () => {
         <div className='flex-1 flex flex-col-reverse gap-3 sm:flex-row'>
           <div className='flex sm:flex-col overflow-x-auto sm:overflow-y-scroll justify-between sm:justify-normal sm:w-[18.7%] w-full'>
               {
-                productData.image.map((item: string, index: number)=>( // Add types
+                productData?.image.map((item: string, index: number)=>( // Add types
                   <img onClick={()=>setImage(item)} src={item} key={index} className='w-[24%] sm:w-full sm:mb-3 flex-shrink-0 cursor-pointer' alt="" />
                 ))
               }
@@ -102,7 +102,7 @@ const Product = () => {
 
         {/* -------- Product Info ---------- */}
         <div className='flex-1'>
-          <h1 className='font-medium text-2xl mt-2'>{productData.name}</h1>
+          <h1 className='font-medium text-2xl mt-2'>{productData?.name}</h1>
           <div className=' flex items-center gap-1 mt-2'>
               <img src={assets.star_icon} alt="" className="w-3 5" />
               <img src={assets.star_icon} alt="" className="w-3 5" />
@@ -111,21 +111,21 @@ const Product = () => {
               <img src={assets.star_dull_icon} alt="" className="w-3 5" />
               <p className='pl-2'>(122)</p>
           </div>
-          <p className='mt-5 text-3xl font-medium'>{currency}{productData.price}</p>
-          <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
+          <p className='mt-5 text-3xl font-medium'>{currency}{productData?.price}</p>
+          <p className='mt-5 text-gray-500 md:w-4/5'>{productData?.description}</p>
           <div className='flex flex-col gap-4 my-8'>
               <p>Select Size</p>
               <div className='flex gap-2'>
-                {productData.sizes.map((item: string, index: number)=>( // Add types
+                {productData?.sizes.map((item: string, index: number)=>( // Add types
                   <button onClick={()=>setSize(item)} className={`border py-2 px-4 bg-gray-100 ${item === size ? 'border-orange-500' : ''}`} key={index}>{item}</button>
                 ))}
               </div>
           </div>
-          {/* Ensure addToCart and productData.id are valid before calling */}
+          {/* Ensure addToCart and productData?.id are valid before calling */}
           <button
              onClick={() => {
                if (productData?.id && size) { // Add check for size as well
-                 addToCart(productData.id, size);
+                 addToCart(productData?.id, size);
                } else if (!size) {
                  // Optionally notify user to select a size
                  alert("Please select a size.");
@@ -159,10 +159,10 @@ const Product = () => {
 
       {/* --------- display related products ---------- */}
       {/* Ensure category and subCategory exist before rendering */}
-      {productData.category && productData.subCategory && (
+      {productData?.category && productData?.subCategory && (
         <RelatedProducts
-          category={productData.category}
-          subCategory={productData.subCategory}
+          category={productData?.category}
+          subCategory={productData?.subCategory}
           onProductClick={scrollToTop} // Add onProductClick prop
         />
       )}

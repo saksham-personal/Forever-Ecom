@@ -21,7 +21,7 @@ interface Address {
   city: string;
   state: string;
   country: string;
-  zipcode: string;
+  pincode: string;
   phone: string;
 }
 
@@ -108,7 +108,7 @@ const Orders: React.FC<OrdersProps> = ({ token }) => {
               <div>
                 <p>{`${order.address.street},`}</p>
                 <p>
-                  {`${order.address.city}, ${order.address.state}, ${order.address.country}, ${order.address.zipcode}`}
+                  {`${order.address.city}, ${order.address.state}, ${order.address.country}, ${order.address.pincode}`}
                 </p>
               </div>
               <p>{order.address.phone}</p>

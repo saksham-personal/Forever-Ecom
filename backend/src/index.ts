@@ -1,13 +1,13 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { connectDb } from "./config/db";
-import connectCloudinary from "./config/cloudinary";
-import userRouter from "./routes/userRoute";
-import productRouter from "./routes/productRoute";
-import cartRouter from "./routes/cartRoute";
-import orderRouter from "./routes/orderRoute";
-import app from "./app";
+import { connectDb } from "./config/db.js";
+import connectCloudinary from "./config/cloudinary.js";
+import userRouter from "./routes/userRoute.js";
+import productRouter from "./routes/productRoute.js";
+import cartRouter from "./routes/cartRoute.js";
+import orderRouter from "./routes/orderRoute.js";
+import app from "./app.js";
 
 dotenv.config();
 const port: number = parseInt(process.env.PORT || "4000", 10);

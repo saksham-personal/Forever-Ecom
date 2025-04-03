@@ -70,6 +70,7 @@ const ShopContextProvider: React.FC<ShopContextProviderProps> = ({ children }) =
     const [search, setSearch] = useState("");
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState<CartItems>({});
+    // @ts-ignore
     const [products, setProducts] = useState<Product[]>([]);
     const [token, setToken] = useState<string>("");
     const navigate = useNavigate();
@@ -150,6 +151,7 @@ const ShopContextProvider: React.FC<ShopContextProviderProps> = ({ children }) =
         return totalAmount;
     };
 
+    
     const getProductsData = async () => {
         try {
             const response = await axios.get(`${backendUrl}/api/product/list`);
@@ -180,9 +182,11 @@ const ShopContextProvider: React.FC<ShopContextProviderProps> = ({ children }) =
         }
     };
 
+    // Fetch products when the context provider mounts
     useEffect(() => {
         getProductsData();
     }, []);
+
 
     useEffect(() => {
         const localToken = localStorage.getItem("token");

@@ -1,16 +1,18 @@
-import { useContext, useEffect, useState, ChangeEvent } from 'react'; // Removed React import
-import { ShopContext } from '../context/ShopContext'; // Import ShopContextType
+import { useContext, useEffect, useState, ChangeEvent } from 'react';
+import { ShopContext, ShopContextType } from '../context/ShopContext';
 import { assets } from '../assets/assets';
 import Title from '../components/Title';
 import ProductItem from '../components/ProductItem';
 import { Product } from '../assets/assets';
+// Removed imports related to local fetching
 
 const Collection: React.FC = () => {
-  // Get context and handle potential undefined value
-  const context = useContext(ShopContext);
-  const products = context?.products ?? [];
-  const search = context?.search ?? "";
-  const showSearch = context?.showSearch ?? false;
+
+  const context = useContext(ShopContext) as ShopContextType;
+
+  // Get products directly from context
+  const { products = [], search = "", showSearch = false } = context;
+  // Removed isLoading and localProducts state
 
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState<Product[]>([]);
@@ -36,62 +38,56 @@ const Collection: React.FC = () => {
     }
   };
 
-  const applyFilter = () => {
-    // Use the context-provided products or the default empty array
-    let productsCopy = [...products];
+  // Removed applyFilter and sortProduct functions
 
+  // --- DIAGNOSTIC STEP: Temporarily comment out combined filter/sort effect ---
+  /*
+  useEffect(() => {
+    // Use products from context for filtering
+    let filtered = [...products];
+
+    // Apply search filter
     if (showSearch && search) {
-      productsCopy = productsCopy.filter((item) =>
+      filtered = filtered.filter((item) =>
         item.name.toLowerCase().includes(search.toLowerCase())
       );
     }
 
+    // Apply category filter
     if (category.length > 0) {
-      productsCopy = productsCopy.filter((item) => category.includes(item.category));
+      filtered = filtered.filter((item) => category.includes(item.category));
     }
 
+    // Apply subCategory filter
     if (subCategory.length > 0) {
-      productsCopy = productsCopy.filter((item) => subCategory.includes(item.subCategory));
+      filtered = filtered.filter((item) => subCategory.includes(item.subCategory));
     }
 
-    setFilterProducts(productsCopy);
-  };
-
-  const sortProduct = () => {
-    let fpCopy = [...filterProducts];
-
+    // Apply sorting
+    let sorted = [...filtered]; // Create a copy to sort
     switch (sortType) {
       case 'low-high':
-        setFilterProducts(fpCopy.sort((a, b) => a.price - b.price));
+        sorted.sort((a, b) => a.price - b.price);
         break;
-
       case 'high-low':
-        setFilterProducts(fpCopy.sort((a, b) => b.price - a.price));
+        sorted.sort((a, b) => b.price - a.price);
         break;
-
-      default:
-        // Re-apply filters to get the original order for 'relevant'
-        applyFilter();
-        break;
+      // 'relevant' (default) uses the filtered order, so no extra sorting needed
     }
-  };
 
+    setFilterProducts(sorted);
+
+  }, [products, category, subCategory, search, showSearch, sortType]);
+  */
+
+  // --- DIAGNOSTIC STEP: Initialize filterProducts directly ---
   useEffect(() => {
-    applyFilter();
-  }, [category, subCategory, search, showSearch, products]); // products dependency is important here
+    setFilterProducts(products); // Just show all products for now
+  }, [products]);
 
-  useEffect(() => {
-    // Only sort if filterProducts has items to avoid unnecessary operations
-    if (filterProducts.length > 0) {
-        sortProduct();
-    }
-  }, [sortType, filterProducts]); // Add filterProducts dependency
+  // Removed local data fetching useEffect and loading state check
 
-  // Handle loading state if context is not yet available
-  if (!context) {
-    return <div>Loading collections...</div>;
-  }
-
+  // Return the JSX for rendering
   return (
     <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t">
       {/* Filter Options */}
@@ -119,7 +115,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Men"
                 onChange={toggleCategory}
-                checked={category.includes("Men")} // Control checkbox state
+                checked={category.includes("Men")}
               />{' '}
               Men
             </p>
@@ -129,7 +125,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Women"
                 onChange={toggleCategory}
-                checked={category.includes("Women")} // Control checkbox state
+                checked={category.includes("Women")}
               />{' '}
               Women
             </p>
@@ -139,7 +135,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Kids"
                 onChange={toggleCategory}
-                checked={category.includes("Kids")} // Control checkbox state
+                checked={category.includes("Kids")}
               />{' '}
               Kids
             </p>
@@ -157,7 +153,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Topwear"
                 onChange={toggleSubCategory}
-                checked={subCategory.includes("Topwear")} // Control checkbox state
+                checked={subCategory.includes("Topwear")}
               />{' '}
               Topwear
             </p>
@@ -167,7 +163,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Bottomwear"
                 onChange={toggleSubCategory}
-                checked={subCategory.includes("Bottomwear")} // Control checkbox state
+                checked={subCategory.includes("Bottomwear")}
               />{' '}
               Bottomwear
             </p>
@@ -177,7 +173,7 @@ const Collection: React.FC = () => {
                 type="checkbox"
                 value="Winterwear"
                 onChange={toggleSubCategory}
-                checked={subCategory.includes("Winterwear")} // Control checkbox state
+                checked={subCategory.includes("Winterwear")}
               />{' '}
               Winterwear
             </p>

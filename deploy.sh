@@ -22,23 +22,26 @@ sudo rm -f /etc/nginx/sites-enabled/default
 # Build frontend
 cd "$SCRIPT_DIR/frontend" || { echo "Frontend directory not found"; exit 1; }
 npm install
-npm run build || { echo "Frontend build failed"; exit 1; }
+VITE_BACKEND_URL="http://$(curl -s ifconfig.me)" npm run build || { echo "Frontend build failed"; exit 1; }
 sudo mkdir -p /var/www/frontend
 [ -d "dist" ] && sudo cp -r dist/* /var/www/frontend/
 
 # Build admin
 cd "$SCRIPT_DIR/admin" || { echo "Admin directory not found"; exit 1; }
+echo "Building admin with backend URL: http://$(curl -s ifconfig.me)" # Added echo for verification
 npm install
-npm run build || { echo "Admin build failed"; exit 1; }
+# Add the environment variable before the build command:
+VITE_BACKEND_URL="http://$(curl -s ifconfig.me)" npm run build || { echo "Admin build failed"; exit 1; }
 sudo mkdir -p /var/www/admin
 [ -d "dist" ] && sudo cp -r dist/* /var/www/admin/
+
 
 # Start backend
 cd "$SCRIPT_DIR/backend" || { echo "Backend directory not found"; exit 1; }
 npm install
 npm audit fix --force
 pm2 delete backend 2>/dev/null
-pm2 start "npm start" --name "backend"
+pm2 start "dist/index.js" --name "backend"
 pm2 save
 pm2 startup
 

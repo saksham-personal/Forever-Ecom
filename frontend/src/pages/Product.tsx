@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from 'react' // Remove React import
-import { useParams } from 'react-router-dom'
-import { ShopContext } from '../context/ShopContext'; // Import ShopContextType
+import { useContext, useEffect, useState } from 'react'; // Keep React import if needed elsewhere, but removed explicit 'React' usage
+import { useParams } from 'react-router-dom';
+import { ShopContext, ShopContextType } from '../context/ShopContext'; // Import ShopContextType
 import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
 
@@ -21,16 +21,14 @@ const Product = () => {
 
   const { productId } = useParams<{ productId: string }>(); // Add type for useParams
   // Explicitly type the context value
-  const context = useContext(ShopContext);
+  const context = useContext(ShopContext) as ShopContextType; // Assert context type
 
-  // Add null checks before destructuring
-  const products = context?.products ?? [];
-  const currency = context?.currency ?? '$'; // Provide a default currency
-  const addToCart = context?.addToCart ?? (() => {}); // Provide a default function
+  // Get products from context
+  const { products = [], currency = 'Rs ', addToCart = () => {} } = context;
 
   const [productData, setProductData] = useState<Product | null>(null); // Initialize with null and type
   const [image, setImage] = useState<string>(''); // Initialize image state
-  const [size,setSize] = useState<string>('') // Initialize size state
+  const [size, setSize] = useState<string>(''); // Initialize size state
 
   // Use useEffect to find the product when products or productId changes
   useEffect(() => {
@@ -39,7 +37,7 @@ const Product = () => {
       const foundProduct = products.find((item: Product) => item.id === productId);
       if (foundProduct) {
         setProductData(foundProduct);
-        setImage(foundProduct.image[0]); // Set initial image
+        setImage(foundProduct.image[0] || ''); // Set initial image safely
         setSize(''); // Reset size selection when product changes
       } else {
         setProductData(null); // Handle case where product is not found
@@ -63,14 +61,27 @@ const Product = () => {
 
   // Add a loading state or return null/message if context or productData is null
   if (!context) {
-    return <div>Loading context...</div>; // Or handle context loading appropriately
+    // This check might be redundant if ShopContextProvider guarantees context
+    return <div className="text-center py-10">Loading context...</div>;
   }
 
-  if (!productData) {
-    return <div>Loading product details...</div>; // Or a spinner component
+  // Show loading message only if products are available but the specific product hasn't been found yet
+  // Or if products themselves are still loading (length is 0)
+  if (!productData && products.length > 0) {
+      return <div className="text-center py-10">Loading product details...</div>;
+  }
+  // Handle case where products are loaded but the specific product ID wasn't found
+  if (!productData && products.length > 0 && productId) {
+      return <div className="text-center py-10">Product not found.</div>;
+  }
+  // Handle case where products array is empty (still loading from context perhaps)
+  if (products.length === 0) {
+      return <div className="text-center py-10">Loading products...</div>;
   }
 
-  return ( // No need for ternary check here anymore if handled above
+
+  // If productData is found, render the component
+  return (
     <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
       {/*----------- Product Data-------------- */}
       <div className='flex gap-12 sm:gap-12 flex-col sm:flex-row'>
@@ -160,4 +171,4 @@ const Product = () => {
   )
 }
 
-export default Product
+export default Product;
